@@ -1,52 +1,73 @@
 import traceback
+from typing import Type
 
-from backend.database import db_shema
-from backend.database.db_helper import DbHelper, db_vers
-from backend.database.db_keys import k_bot_conf_table, k_type, k_value
-from backend.database.entitys.y_signal import ySignal
-from backend.database.entitys.y_user import yUser
+from y_database.db_helper import DbHelper
+from y_database.db_keys import k_bot_conf_table, k_value, k_type
+from y_database.entitys import yEntity
 
-s_db_entitys = [ySignal,yUser]
-#
-s_db_gen_tables = {
-#   k_user_table: yUser,
-#   k_song_table: ySunoWork
-}
 
-for q_entity in s_db_entitys:
-  s_db_gen_tables[q_entity.__name__] = q_entity
+def get_sql_create_table(f_name,f_entity):
 
-# for q_entitys in s_db_entitys:
-#   if not q_entitys in s_db_gen_tables.values():
-#     s_db_gen_tables[q_entitys.__name__] = q_entitys
 
-def update_db():
+  f_result = f""" CREATE TABLE IF NOT EXISTS {f_name} (
+                                           id integer PRIMARY KEY,\n"""
+
+  f_param = f_entity.__dict__
+  f_fields = f_param['__annotations__']
+  for q_name in f_fields.keys():
+    if q_name == 'id':
+      continue
+    q_field = f_fields[q_name]
+    q_type = 'text'
+    # print(q_field)
+    if q_field is int:
+      # print('its int')
+      q_type = 'integer'
+
+    f_result += f'`{q_name}` {q_type},'
+
+  f_result = f_result.removesuffix(',')
+  f_result += ');'
+
+  return f_result
+
+
+def update_db(f_db_entitys : list[Type[yEntity]]):
+  # s_db_entitys = [ySignal, yUser]
+  #
+  f_db_gen_tables = {
+    #   k_user_table: yUser,
+    #   k_song_table: ySunoWork
+  }
+
+  for q_entity in f_db_entitys:
+    f_db_gen_tables[q_entity.__name__] = q_entity
 
   f_db = DbHelper()
   try:
     f_vers = int(f_db.get_cell_by_coll(k_bot_conf_table, k_type, 'db_version', k_value))
   except:
     f_vers = -1
-  if f_vers < 1:
-    try:
-      for q_table in db_shema.create_tables_list:
-        f_db.cur.execute(q_table)
-      print('db created')
-    except:
-      print(traceback.format_exc())
-
-    f_db.add_cell_by_coll(k_bot_conf_table, k_type, 'db_version', k_value, db_vers)
-
-    print('success update db')
+  # if f_vers < 1:
+  #   try:
+  #     for q_table in db_shema.create_tables_list:
+  #       f_db.cur.execute(q_table)
+  #     print('db created')
+  #   except:
+  #     print(traceback.format_exc())
+  #
+  #   f_db.add_cell_by_coll(k_bot_conf_table, k_type, 'db_version', k_value, db_vers)
+  #
+  #   print('success update db')
 
   print('check autogener tables, for now only coll count')
 
-  for q_table in s_db_gen_tables.keys():
-    q_obj_colls = s_db_gen_tables[q_table].__dict__['__annotations__']
+  for q_table in f_db_gen_tables.keys():
+    q_obj_colls = f_db_gen_tables[q_table].__dict__['__annotations__']
     try:
       f_db.cur.execute(f'select * from {q_table}')
     except:
-      q_creater = db_shema.get_sql_create_table(q_table,s_db_gen_tables[q_table])
+      q_creater = get_sql_create_table(q_table, f_db_gen_tables[q_table])
       f_db.cur.execute(q_creater)
       f_db.cur.execute(f'select * from {q_table}')
     q_table_colls = list(map(lambda x: x[0], f_db.cur.description))
