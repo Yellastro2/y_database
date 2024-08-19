@@ -15,7 +15,7 @@ def get_entity_by_coll(f_type,f_coll,f_vall, f_db=DbHelper()) -> yEntity:
   return f_type(f_res)
 
 
-def update_entity(f_entity: yEntity,f_db = DbHelper()):
+def update_entity(f_entity: yEntity,f_db = DbHelper()) -> int:
   # Если айди -1 - сущность новая, функция добавить ее в базу и добавит новый айди в сущность
   if f_entity.id == -1:
     print(f'make new entity of signal')
@@ -23,7 +23,7 @@ def update_entity(f_entity: yEntity,f_db = DbHelper()):
                  f_entity.get_data())
     f_entity.id = f_new_id
   else:
-    print(f'upd exist entity')
+    print(f'upd exist entity')  # ебень полная, тут после get_data() id ставится -1 ?!?!?!
     f_db.upd_row_by_coll(f_entity.__class__.__name__,
                          'id',
                          f_entity.id,
