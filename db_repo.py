@@ -1,5 +1,5 @@
-from backend.database.db_helper import DbHelper
-from backend.database.entitys.y_entity import yEntity
+from y_database.db_helper import DbHelper
+from y_database.entitys import yEntity
 
 
 def get_entity(f_id,f_type,f_db = DbHelper()) -> yEntity:

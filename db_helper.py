@@ -4,13 +4,6 @@ from sqlite3 import Connection
 
 import sys
 
-import private_conf
-from backend.database import db_shema
-from backend.database.db_keys import k_bot_conf_table, k_value, k_type, k_work_id, k_status, k_karaoke_table, k_mode, \
-  k_user_table, k_song_table
-from backend.database.entitys.y_entity import yEntity
-from backend.database.entitys.y_signal import ySignal
-from backend.database.entitys.y_user import yUser
 
 db_vers = 1
 
