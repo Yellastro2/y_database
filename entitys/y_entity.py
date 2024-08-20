@@ -1,9 +1,6 @@
 
-
 class yEntity:
-
   id: int = -1
-
 
   def __init__(self,params):
     f_fields = self.list_attributes()
@@ -14,8 +11,6 @@ class yEntity:
       else:
         print(f'{self.__name__} init without enougth params')
       i += 1
-
-
 
   def get_data(self) -> dict:
     f_data = self.__dict__

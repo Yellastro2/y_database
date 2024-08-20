@@ -39,21 +39,6 @@ class DbHelper():
     except:
       pass
 
-  # def update_entity(self,f_entity: yEntity):
-  #   # Если айди -1 - сущность новая, функция добавить ее в базу и добавит новый айди в сущность
-  #   if f_entity.id == -1:
-  #     f_new_id = self.add_row(f_entity.__class__.__name__,
-  #                  f_entity.get_data())
-  #     f_entity.id = f_new_id
-  #   else:
-  #     self.upd_row_by_coll(f_entity.__class__.__name__,
-  #                          'id',
-  #                          f_entity.id,
-  #                          f_entity.get_data())
-  #     f_new_id = f_entity.id
-  #
-  #   return f_new_id
-
   def get_cell_by_coll(self, table, coll, coll_val, f_cell):
     SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = '{coll_val}'"
     result = self.cur.execute(SQL)
