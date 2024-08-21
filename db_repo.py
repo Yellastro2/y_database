@@ -3,17 +3,17 @@ from typing import TypeVar, Generic
 from y_database.db_helper import DbHelper
 from y_database.entitys import yEntity
 
-T = TypeVar("T",yEntity,yEntity)
+T = TypeVar("T")
 
 def get_entity(f_id,
-               f_type: Generic[T],
+               f_type: T,
                f_db = DbHelper()) -> T:
   f_res = f_db.get_row_by_coll(f_type.__name__, "id", f_id)
 
   return f_type(f_res)
 
 
-def get_entity_by_coll(f_type,f_coll,f_vall, f_db=DbHelper()) -> yEntity:
+def get_entity_by_coll(f_type: T,f_coll,f_vall, f_db=DbHelper()) -> T:
   f_res = f_db.get_row_by_coll(f_type.__name__, f_coll, f_vall)
   if not f_res:
     return f_res
