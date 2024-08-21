@@ -13,7 +13,7 @@ class yEntity:
       i += 1
 
   def get_data(self) -> dict:
-    f_data = self.__dict__
+    f_data = self.__dict__.copy()
     f_data.pop('id')
     return f_data
 

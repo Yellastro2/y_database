@@ -86,7 +86,7 @@ def update_db(f_db_entitys : list[Type[yEntity]]):
           f_db.conn.commit()
   f_db.close()
 
-  f_end = datetime.datetime.now().timestamp() - f_start
+  f_end = round(datetime.datetime.now().timestamp() - f_start,4)
 
   print(f'yDatabase inited: {f_end} sec')
 
