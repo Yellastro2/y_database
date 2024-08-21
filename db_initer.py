@@ -1,3 +1,4 @@
+import datetime
 import traceback
 from typing import Type
 
@@ -33,11 +34,10 @@ def get_sql_create_table(f_name,f_entity):
 
 
 def update_db(f_db_entitys : list[Type[yEntity]]):
-  # s_db_entitys = [ySignal, yUser]
-  #
+  print(f'Start init yDatabase')
+  f_start = datetime.datetime.now().timestamp()
+
   f_db_gen_tables = {
-    #   k_user_table: yUser,
-    #   k_song_table: ySunoWork
   }
 
   for q_entity in f_db_entitys:
@@ -85,6 +85,10 @@ def update_db(f_db_entitys : list[Type[yEntity]]):
           f_db.cur.execute(f"alter table {q_table} add column '%s'  {q_type}"% q_key)
           f_db.conn.commit()
   f_db.close()
+
+  f_end = datetime.datetime.now().timestamp() - f_start
+
+  print(f'yDatabase inited: {f_end} sec')
 
 
 
