@@ -1,12 +1,22 @@
+import traceback
+
 
 class yEntity:
   id: int = -1
 
   def __init__(self,params):
+    params = list(params)
     f_fields = self.list_attributes()
+    f_anotated = self.__annotations__
     i = 0
     for q_field in f_fields:
       if len(params) > i:
+        if q_field in f_anotated.keys() and f_anotated[q_field] == float and isinstance(params[i],str):
+          try:
+            params[i] = float(params[i])
+          except:
+            e = traceback.format_exc()
+            print('ERROR on parse float from string in yEntity')
         self.__dict__[q_field] = params[i]
       else:
         print(f'{self.__name__} init without enougth params')
@@ -15,6 +25,11 @@ class yEntity:
   def get_data(self) -> dict:
     f_data = self.__dict__.copy()
     f_data.pop('id')
+
+    for q_d in f_data.keys():
+      if isinstance(f_data[q_d],float):
+        f_data[q_d] = str(f_data[q_d])
+
     return f_data
 
   def list_attributes(self):
