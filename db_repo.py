@@ -12,6 +12,14 @@ def get_entity(f_id,
 
   return f_type(f_res)
 
+def get_all(f_type: T,
+            f_db = DbHelper()) -> list[T]:
+  f_res = f_db.get_table(f_type.__name__)
+  f_all = []
+  for q_it in f_res:
+    f_all.append(f_type(q_it))
+  return f_all
+
 
 def get_entity_by_coll(f_type: T,f_coll,f_vall, f_db=DbHelper()) -> T:
   f_res = f_db.get_row_by_coll(f_type.__name__, f_coll, f_vall)

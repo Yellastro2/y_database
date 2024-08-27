@@ -1,3 +1,6 @@
+from sqlite3 import Connection
+
+from y_database.connectors import sqlite_connection
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
@@ -6,32 +9,27 @@ db_vers = 1
 
 all_conns = {}
 
-def DbHelper(f_type = 'sqlite') -> yDbHelper:
+def get_con(f_type = 'sqlite'):
   '''
 
   :param f_type: 'sqlite' | 'mysql'
   :return:
   '''
 
-  if f_type not in all_conns.keys():
-    if f_type == 'sqlite':
-      from y_database.sqlite_helper import DbHelper
+  from y_database.connectors.sqlite_connection import get_con
 
-      all_conns[f_type] = DbHelper()
-    elif f_type == 'mysql':
-      from y_database.mysql_helper import DbHelper
-
-      all_conns[f_type] = DbHelper()
+  all_conns[f_type] = sqlite_connection.get_con()
   return all_conns[f_type]
 
 # conn = get_con()
 
 
 
-class DbHelper_v0():
+class DbHelper(yDbHelper):
+  conn: Connection
 
-
-  def __init__(self,f_type = 'sqlite'):
+  def __init__(self, f_type='sqlite'):
+    super().__init__()
     self.conn = get_con(f_type)
     self.cur = self.conn.cursor()
 
@@ -43,6 +41,21 @@ class DbHelper_v0():
       pass
     except:
       pass
+
+  def get_cells_by_colls(self,table, coll, coll_val:list, f_cell):
+
+
+    f_valstr = ''
+    # f_vall = str(f_vall)
+    for q_val in coll_val:
+      f_valstr += f'?,'
+
+    f_valstr = f_valstr.removesuffix(',')
+    # f_sql = f"SELECT * FROM {f_table} WHERE {f_coll} IN ({f_valstr})"
+    SQL = f"SELECT * FROM `{table}` WHERE `{coll}` IN ({f_valstr})"
+    result = self.cur.execute(SQL,
+                              coll_val)
+    return result
 
   def get_cell_by_coll(self, table, coll, coll_val, f_cell):
     SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = '{coll_val}'"

@@ -1,39 +1,10 @@
-from y_database.y_db_helper import yDbHelper
-
-db_vers = 1
-
-# conn: Connection
-
-all_conns = {}
-
-def DbHelper(f_type = 'sqlite') -> yDbHelper:
-  '''
-
-  :param f_type: 'sqlite' | 'mysql'
-  :return:
-  '''
-
-  if f_type not in all_conns.keys():
-    if f_type == 'sqlite':
-      from y_database.sqlite_helper import DbHelper
-
-      all_conns[f_type] = DbHelper()
-    elif f_type == 'mysql':
-      from y_database.mysql_helper import DbHelper
-
-      all_conns[f_type] = DbHelper()
-  return all_conns[f_type]
-
-# conn = get_con()
 
 
+class yDbHelper():
 
-class DbHelper_v0():
 
-
-  def __init__(self,f_type = 'sqlite'):
-    self.conn = get_con(f_type)
-    self.cur = self.conn.cursor()
+  def __init__(self):
+    pass
 
 
 
@@ -43,6 +14,10 @@ class DbHelper_v0():
       pass
     except:
       pass
+
+
+  def get_cells_by_colls(self,table, coll, coll_val:list, f_cell):
+    pass
 
   def get_cell_by_coll(self, table, coll, coll_val, f_cell):
     SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = '{coll_val}'"
@@ -174,13 +149,3 @@ class DbHelper_v0():
       f_sql = f"INSERT INTO `{table}` (`{coll}`, `{cell}`) VALUES (?, ? )"
       self.cur.execute(f_sql,f_vals)
     return self.conn.commit()
-
-
-
-
-# def update_con():
-#   global conn
-#   conn = get_con()
-
-
-
