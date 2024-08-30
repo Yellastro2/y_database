@@ -29,6 +29,8 @@ class DbHelper(yDbHelper):
   conn: MySQLConnection
   cur: MySQLCursor
 
+  key_val = '%s'
+
   def __init__(self, f_type='sqlite'):
     super().__init__()
     self.conn = get_con(f_type)
@@ -42,6 +44,105 @@ class DbHelper(yDbHelper):
       pass
     except:
       pass
+
+  def execute_sql(self,SQL,valls: tuple, cur = ""):
+    print(f'EXECUTE SQL: {SQL}')
+    is_exclusive_cursor = False
+    if not cur:
+      is_exclusive_cursor = True
+
+      cur = self.conn.cursor()
+  # with self.conn.cursor(buffered=True) as cur:
+
+    cur.execute(SQL, valls)
+    return cur, is_exclusive_cursor
+
+  def fetch_result(self,cur: MySQLCursor,type = 'single',is_exclusive_cursor = True):
+
+    cur.stored_results()
+    if type == 'single':
+      f_result = cur.fetchone()
+    else:
+      f_result = cur.fetchall()
+
+    if is_exclusive_cursor:
+      cur.close()
+    return f_result
+
+  def get_rows_by_coll(self, f_table, f_coll, f_vall, cur = ""):
+    f_sql = f"SELECT * FROM {f_table} WHERE {f_coll} = {self.key_val}"
+    # result = self.cur.execute(,
+    #                              (f_vall,))
+    # return result.fetchall()
+
+    cur, isexc = self.execute_sql(f_sql, (f_vall,), cur)
+    return self.fetch_result(cur, 'all', isexc)
+
+  def get_rows_by_colls(self, f_table, f_colls: dict, cur = ""):
+    f_sql = f"SELECT * FROM {f_table} WHERE "
+    f_params = []
+    for q_coll in f_colls.keys():
+      f_sql += f"{q_coll} = ? AND "
+      f_params.append(f_colls[q_coll])
+
+    f_sql = f_sql.removesuffix(" AND ")
+    result = self.cur.execute(f_sql,
+                                 f_params)
+    cur, isexc = self.execute_sql(f_sql, f_params, cur)
+    return self.fetch_result(cur, 'all', isexc)
+
+  def get_row_by_coll(self, table, coll, coll_vall,cur = ""):
+
+    f_sql = f"SELECT * FROM `{table}` WHERE `{coll}` = %s"
+    cur, isexc = self.execute_sql(f_sql, (coll_vall,), cur)
+    return self.fetch_result(cur, 'single', isexc)
+
+  def get_rows_by_coll_in(self,f_table,f_coll,f_vall,cur = ""):
+    f_valstr = ''
+    for q_val in f_vall:
+      f_valstr += f'{self.key_val},'
+
+    f_valstr = f_valstr.removesuffix(',')
+    f_sql = f"SELECT * FROM {f_table} WHERE {f_coll} IN ({f_valstr})"
+    cur,isexc = self.execute_sql(f_sql,f_vall,cur)
+    return self.fetch_result(cur,'all',isexc)
+    # result =  cur.fetchall()
+
+    # result = self.cur.execute(f_sql,
+    #                              f_vall)
+    # return result.fetchall()
+
+
+  def get_cell_by_coll(self, table, coll, coll_val, f_cell,cur = ""):
+    SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = %s;"
+    cur, isexc = self.execute_sql(SQL, (coll_val,), cur)
+    return self.fetch_result(cur, 'single', isexc)
+    # with self.conn.cursor(buffered=True) as cur:
+    #   cur.execute(SQL,(coll_val,))
+    #
+    #   result = cur.fetchone()[0]
+    #   # cur.close()
+    #   return result
+
+  def get_table(self, f_table):
+    f_sql = f"SELECT * FROM `{f_table}`;"
+    with self.conn.cursor(buffered=True) as cur:
+      result = cur.execute(f_sql)
+      return cur.fetchall()
+
+  def get_table_cells(self,table,cell,cur = ""):
+    SQL = f"SELECT `{cell}` FROM `{table}` "
+    cur, isexc = self.execute_sql(SQL, (), cur)
+    result = []
+    for q_fetch in self.fetch_result(cur, 'all', isexc):
+      result.append(q_fetch[0])
+    return result
+    # with self.conn.cursor(buffered=True) as cur:
+    #   cur.execute(SQL)
+    #   result = []
+    #   for q_fetch in cur.fetchall():
+    #     result.append(q_fetch[0])
+    #   return result
 
   def get_cells_by_colls(self, table, coll, coll_val: list, f_cell):
 
@@ -57,14 +158,7 @@ class DbHelper(yDbHelper):
                               coll_val)
     return self.cur.fetchall()
 
-  def get_cell_by_coll(self, table, coll, coll_val, f_cell):
-    SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = %s;"
-    with self.conn.cursor(buffered=True) as cur:
-      cur.execute(SQL,(coll_val,))
 
-      result =  cur.fetchone()[0]
-      cur.close()
-      return result
 
   def row_exists(self,table,coll,coll_val):
       #Проверяем, есть ли юзер в базе
@@ -80,11 +174,7 @@ class DbHelper(yDbHelper):
     result = self.cur.execute(f_sql)
     return result.fetchall()
 
-  def get_table(self, f_table):
-    f_sql = f"SELECT * FROM `{f_table}`;"
-    with self.conn.cursor(buffered=True) as cur:
-      result = cur.execute(f_sql)
-      return cur.fetchall()
+
 
   def delete_row_by_coll(self, f_table, coll, coll_vall):
     self.cur.execute(f"DELETE FROM `{f_table}` WHERE `{coll}` = ?", (coll_vall,))
@@ -109,10 +199,7 @@ class DbHelper(yDbHelper):
 
     return f_res
 
-  def get_row_by_coll(self, table, coll, coll_vall):
-    # Достаем id юзера в базе по его user_id
-    result = self.cur.execute(f"SELECT * FROM {table} WHERE {coll} = ?", (coll_vall,))
-    return result.fetchone()
+
 
 
 
@@ -122,34 +209,14 @@ class DbHelper(yDbHelper):
     result = self.cur.execute(f_sql,(f_vall,))
     return result.fetchone()
 
-  def get_rows_by_coll_in(self,f_table,f_coll,f_vall):
-    f_valstr = ''
-    # f_vall = str(f_vall)
-    for q_val in f_vall:
-      f_valstr += f'?,'
 
-    f_valstr = f_valstr.removesuffix(',')
-    f_sql = f"SELECT * FROM {f_table} WHERE {f_coll} IN ({f_valstr})"
-    result = self.cur.execute(f_sql,
-                                 f_vall)
-    return result.fetchall()
 
   def get_rows_by_coll(self, f_table, f_coll, f_vall):
     result = self.cur.execute(f"SELECT * FROM {f_table} WHERE {f_coll} = ?",
                                  (f_vall,))
     return result.fetchall()
 
-  def get_rows_by_colls(self, f_table, f_colls: dict):
-    f_sql = f"SELECT * FROM {f_table} WHERE "
-    f_params = []
-    for q_coll in f_colls.keys():
-      f_sql += f"{q_coll} = ? AND "
-      f_params.append(f_colls[q_coll])
 
-    f_sql = f_sql.removesuffix(" AND ")
-    result = self.cur.execute(f_sql,
-                                 f_params)
-    return result.fetchall()
 
   def add_row(self, table, data):
     f_sql = f'INSERT INTO "{table}" ('

@@ -1,6 +1,8 @@
+from sqlite3 import Connection
 
 
 class yDbHelper():
+  conn: Connection
 
 
   def __init__(self):
@@ -15,11 +17,17 @@ class yDbHelper():
     except:
       pass
 
+  def get_table_cells(self,table,cell):
+    SQL = f"SELECT `{cell}` FROM `{table}` "
+    result = self.cur.execute(SQL)
+    return result.fetchall()
+
+
 
   def get_cells_by_colls(self,table, coll, coll_val:list, f_cell):
     pass
 
-  def get_cell_by_coll(self, table, coll, coll_val, f_cell):
+  def get_cell_by_coll(self, table, coll, coll_val, f_cell,cur = ""):
     SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = '{coll_val}'"
     result = self.cur.execute(SQL)
     return result.fetchone()[0]
@@ -79,7 +87,7 @@ class yDbHelper():
     result = self.cur.execute(f_sql,(f_vall,))
     return result.fetchone()
 
-  def get_rows_by_coll_in(self,f_table,f_coll,f_vall):
+  def get_rows_by_coll_in(self,f_table,f_coll,f_vall,cur = ""):
     f_valstr = ''
     # f_vall = str(f_vall)
     for q_val in f_vall:

@@ -1,3 +1,5 @@
+import traceback
+
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
@@ -23,6 +25,13 @@ def DbHelper(f_type = 'sqlite') -> yDbHelper:
 
       all_conns[f_type] = DbHelper()
   return all_conns[f_type]
+
+def close_all():
+  if 'mysql' in all_conns:
+    try:
+      all_conns['mysql'].conn.close()
+    except:
+      print(traceback.format_exc())
 
 # conn = get_con()
 
