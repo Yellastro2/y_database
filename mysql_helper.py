@@ -1,6 +1,11 @@
+import time
+import traceback
+
+import mysql
 from mysql.connector import MySQLConnection
 from mysql.connector.cursor import MySQLCursor
 
+import private_conf
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
@@ -28,13 +33,21 @@ def get_con(f_type = 'sqlite'):
 class DbHelper(yDbHelper):
   conn: MySQLConnection
   cur: MySQLCursor
+  is_connected = False
 
   key_val = '%s'
 
   def __init__(self, f_type='sqlite'):
     super().__init__()
-    self.conn = get_con(f_type)
-    self.cur = self.conn.cursor()
+    # self.conn = get_con(f_type)
+    self.connection_pool = mysql.connector.pooling.MySQLConnectionPool(
+      pool_name="inventory_pool",
+      host=private_conf.some_args.get('mysql_host'),
+      user=private_conf.some_args.get('mysql_user'),
+      password=private_conf.some_args.get('mysql_pass'),
+      database=private_conf.some_args.get('mysql_db')
+    )
+    # self.cur = self.conn.cursor()
 
 
 
@@ -54,22 +67,41 @@ class DbHelper(yDbHelper):
 
       # cur = self.conn.cursor()
   # with self.conn.cursor(buffered=True) as cur:
+  #   self.conn = get_con()
 
-    cur = self.cur
+    connection = self.connection_pool.get_connection()
+    cur = connection.cursor()
 
-    cur.execute(SQL, valls)
-    return cur, False
+    # try:
+    #   cur = self.conn.cursor()
+    #   self.is_connected = True
+    # except Exception as e:
+    #   print(traceback.format_exc())
 
-  def fetch_result(self,cur: MySQLCursor,type = 'single',is_exclusive_cursor = True):
+    try:
+      cur.execute(SQL, valls)
+    except Exception as e:
+      print(traceback.format_exc())
 
-    cur.stored_results()
-    if type == 'single':
-      f_result = cur.fetchone()
-    else:
-      f_result = cur.fetchall()
+    return cur, connection
 
-    if is_exclusive_cursor:
-      cur.close()
+  def fetch_result(self,cur: MySQLCursor,
+                   conn ,
+                   type = 'single'):
+
+    # cur.stored_results()
+
+    try:
+      if type == 'single':
+        f_result = cur.fetchone()
+      else:
+        f_result = cur.fetchall()
+    except Exception as e:
+      print(traceback.format_exc())
+
+
+    cur.close()
+    conn.close()
     return f_result
 
   def get_rows_by_coll(self, f_table, f_coll, f_vall, cur = ""):
@@ -78,8 +110,8 @@ class DbHelper(yDbHelper):
     #                              (f_vall,))
     # return result.fetchall()
 
-    cur, isexc = self.execute_sql(f_sql, (f_vall,), cur)
-    return self.fetch_result(cur, 'all', isexc)
+    cur, conn = self.execute_sql(f_sql, (f_vall,), cur)
+    return self.fetch_result(cur,conn, 'all')
 
   def get_rows_by_colls(self, f_table, f_colls: dict, cur = ""):
     f_sql = f"SELECT * FROM {f_table} WHERE "
@@ -91,14 +123,14 @@ class DbHelper(yDbHelper):
     f_sql = f_sql.removesuffix(" AND ")
     result = self.cur.execute(f_sql,
                                  f_params)
-    cur, isexc = self.execute_sql(f_sql, f_params, cur)
-    return self.fetch_result(cur, 'all', isexc)
+    cur, conn = self.execute_sql(f_sql, f_params, cur)
+    return self.fetch_result(cur,conn, 'all')
 
   def get_row_by_coll(self, table, coll, coll_vall,cur = ""):
 
     f_sql = f"SELECT * FROM `{table}` WHERE `{coll}` = %s"
-    cur, isexc = self.execute_sql(f_sql, (coll_vall,), cur)
-    return self.fetch_result(cur, 'single', isexc)
+    cur, conn = self.execute_sql(f_sql, (coll_vall,), cur)
+    return self.fetch_result(cur,conn, 'single')
 
   def get_rows_by_coll_in(self,f_table,f_coll,f_vall,cur = ""):
     f_valstr = ''
@@ -107,8 +139,8 @@ class DbHelper(yDbHelper):
 
     f_valstr = f_valstr.removesuffix(',')
     f_sql = f"SELECT * FROM {f_table} WHERE {f_coll} IN ({f_valstr})"
-    cur,isexc = self.execute_sql(f_sql,f_vall,cur)
-    return self.fetch_result(cur,'all',isexc)
+    cur, conn = self.execute_sql(f_sql,f_vall,cur)
+    return self.fetch_result(cur,conn,'all')
     # result =  cur.fetchall()
 
     # result = self.cur.execute(f_sql,
@@ -118,8 +150,8 @@ class DbHelper(yDbHelper):
 
   def get_cell_by_coll(self, table, coll, coll_val, f_cell,cur = ""):
     SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = %s;"
-    cur, isexc = self.execute_sql(SQL, (coll_val,), cur)
-    return self.fetch_result(cur, 'single', isexc)
+    cur, conn = self.execute_sql(SQL, (coll_val,), cur)
+    return self.fetch_result(cur,conn, 'single')
     # with self.conn.cursor(buffered=True) as cur:
     #   cur.execute(SQL,(coll_val,))
     #
@@ -129,15 +161,17 @@ class DbHelper(yDbHelper):
 
   def get_table(self, f_table):
     f_sql = f"SELECT * FROM `{f_table}`;"
-    with self.conn.cursor(buffered=True) as cur:
-      result = cur.execute(f_sql)
-      return cur.fetchall()
+    # with self.conn.cursor(buffered=True) as cur:
+    # result = self.cur.execute(f_sql)
+    # return self.cur.fetchall()
+    cur, conn = self.execute_sql(f_sql, (), self.cur)
+    return self.fetch_result(cur,conn, 'all')
 
   def get_table_cells(self,table,cell,cur = ""):
     SQL = f"SELECT `{cell}` FROM `{table}` "
-    cur, isexc = self.execute_sql(SQL, (), cur)
+    cur, conn = self.execute_sql(SQL, (), cur)
     result = []
-    for q_fetch in self.fetch_result(cur, 'all', isexc):
+    for q_fetch in self.fetch_result(cur,conn, 'all'):
       result.append(q_fetch[0])
     return result
     # with self.conn.cursor(buffered=True) as cur:
