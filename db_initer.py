@@ -33,7 +33,7 @@ def get_sql_create_table(f_name,f_entity):
   return f_result
 
 
-def update_db(f_db_entitys : list[Type[yEntity]]):
+def update_db(f_db_entitys : list[Type[yEntity]],f_db = DbHelper()):
   print(f'Start init yDatabase')
   f_start = datetime.datetime.now().timestamp()
 
@@ -43,7 +43,7 @@ def update_db(f_db_entitys : list[Type[yEntity]]):
   for q_entity in f_db_entitys:
     f_db_gen_tables[q_entity.__name__] = q_entity
 
-  f_db = DbHelper()
+
   try:
     f_vers = int(f_db.get_cell_by_coll(k_bot_conf_table, k_type, 'db_version', k_value))
   except:

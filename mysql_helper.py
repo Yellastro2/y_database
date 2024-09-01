@@ -41,6 +41,7 @@ class DbHelper(yDbHelper):
   def close(self):
     try:
       # self.cur.close()
+      self.cur.fetchall()
       pass
     except:
       pass
@@ -51,7 +52,7 @@ class DbHelper(yDbHelper):
     if not cur:
       is_exclusive_cursor = True
 
-      cur = self.conn.cursor()
+      # cur = self.conn.cursor()
   # with self.conn.cursor(buffered=True) as cur:
 
     cur = self.cur
@@ -221,19 +222,24 @@ class DbHelper(yDbHelper):
 
 
   def add_row(self, table, data):
-    f_sql = f'INSERT INTO "{table}" ('
+    f_sql = f'INSERT INTO `{table}` ('
     f_values = ''
     f_val_array = []
     for q_key in data.keys():
-      f_sql += f'"{q_key}", '
+      f_sql += f'{self.key_val},'
       # f_values += f"'{data[q_key]}',"
-      f_values += f"?,"
-      f_val_array.append(data[q_key])
+      f_values += f"{self.key_val},"
+
+      # f_val_array.append(q_key)
+      f_val_array.append(str(data[q_key]))
+
+    f_val_array = list(data.keys()) + f_val_array
+
     f_sql = f_sql.removesuffix(', ')
     f_values = f_values.removesuffix(',')
     f_sql += f") VALUES ({f_values})"
     f_some = self.cur.execute(f_sql, f_val_array)
-    f_last_id = f_some.lastrowid
+    f_last_id = self.cur.lastrowid
     self.conn.commit()
     return f_last_id
 
