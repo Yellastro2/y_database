@@ -34,7 +34,7 @@ class DbHelper(yDbHelper):
   def __init__(self, f_type='sqlite'):
     super().__init__()
     self.conn = get_con(f_type)
-    # self.cur = self.conn.cursor()
+    self.cur = self.conn.cursor()
 
 
 
@@ -54,8 +54,10 @@ class DbHelper(yDbHelper):
       cur = self.conn.cursor()
   # with self.conn.cursor(buffered=True) as cur:
 
+    cur = self.cur
+
     cur.execute(SQL, valls)
-    return cur, is_exclusive_cursor
+    return cur, False
 
   def fetch_result(self,cur: MySQLCursor,type = 'single',is_exclusive_cursor = True):
 
