@@ -27,7 +27,8 @@ class yEntity:
             logging.error('ERROR on parse json from string in yEntity')
         self.__dict__[q_field] = params[i]
       else:
-        logging.warning(f'{self.__name__} init without enougth params')
+        logging.warning(f'{self.__class__.__name__} init without enougth params')
+        break
       i += 1
 
   def get_data(self) -> dict:
