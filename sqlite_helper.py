@@ -1,9 +1,13 @@
+import logging
 from sqlite3 import Connection
 
 from y_database.connectors import sqlite_connection
+from y_database.db_confings import default_name
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
+
+
 
 # conn: Connection
 
@@ -21,23 +25,31 @@ def get_con(f_type = 'sqlite'):
   all_conns[f_type] = sqlite_connection.get_con()
   return all_conns[f_type]
 
-# conn = get_con()
+def get_db_connection(f_name = default_name):
+  all_conns[f_name] = sqlite_connection.get_con(f_name)
+  return all_conns[f_name]
+
 
 
 
 class DbHelper(yDbHelper):
   conn: Connection
 
-  def __init__(self, f_type='sqlite'):
+  def __init__(self):
     super().__init__()
-    self.conn = get_con(f_type)
+    self.conn = get_db_connection()
     self.cur = self.conn.cursor()
+
 
 
 
   def close(self):
     try:
       # self.cur.close()
+      # try:
+      #   all_conns['suno.db'].close()
+      # except:
+      #   logging.error(f": ERROR CLOSE SQLITE DATABASE")
       pass
     except:
       pass

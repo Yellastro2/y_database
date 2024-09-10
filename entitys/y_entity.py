@@ -1,4 +1,5 @@
 import json
+import logging
 import traceback
 
 
@@ -17,16 +18,16 @@ class yEntity:
             params[i] = float(params[i])
           except:
             e = traceback.format_exc()
-            print('ERROR on parse float from string in yEntity')
+            logging.error('ERROR on parse float from string in yEntity')
         if q_field in f_anotated.keys() and f_anotated[q_field] in [list,dict,tuple] and isinstance(params[i],str):
           try:
             params[i] = json.loads(params[i])
           except:
             e = traceback.format_exc()
-            print('ERROR on parse json from string in yEntity')
+            logging.error('ERROR on parse json from string in yEntity')
         self.__dict__[q_field] = params[i]
       else:
-        print(f'{self.__name__} init without enougth params')
+        logging.warning(f'{self.__name__} init without enougth params')
       i += 1
 
   def get_data(self) -> dict:

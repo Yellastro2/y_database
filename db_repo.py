@@ -30,6 +30,7 @@ def get_entity_by_coll(f_type: T,f_coll,f_vall, f_db=DbHelper()) -> T:
 
 
 def update_entity(f_entity: yEntity,f_db = DbHelper()) -> int:
+
   # Если айди -1 - сущность новая, функция добавить ее в базу и добавит новый айди в сущность
   if f_entity.id == -1:
     print(f'make new entity of signal')
