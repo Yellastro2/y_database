@@ -44,10 +44,10 @@ def update_db(f_db_entitys : list[Type[yEntity]],f_db = DbHelper()):
     f_db_gen_tables[q_entity.__name__] = q_entity
 
 
-  try:
-    f_vers = int(f_db.get_cell_by_coll(k_bot_conf_table, k_type, 'db_version', k_value))
-  except:
-    f_vers = -1
+  # try:
+  #   f_vers = int(f_db.get_cell_by_coll(k_bot_conf_table, k_type, 'db_version', k_value))
+  # except:
+  #   f_vers = -1
   # if f_vers < 1:
   #   try:
   #     for q_table in db_shema.create_tables_list:
@@ -65,12 +65,20 @@ def update_db(f_db_entitys : list[Type[yEntity]],f_db = DbHelper()):
   for q_table in f_db_gen_tables.keys():
     q_obj_colls = f_db_gen_tables[q_table].__dict__['__annotations__']
     try:
-      f_db.cur.execute(f'select * from {q_table}')
+      f_db.fetch_all(f'select * from {q_table}')
+      # f_db.cur.execute(f'select * from {q_table}')
     except:
       q_creater = get_sql_create_table(q_table, f_db_gen_tables[q_table])
-      f_db.cur.execute(q_creater)
-      f_db.cur.execute(f'select * from {q_table}')
-    q_table_colls = list(map(lambda x: x[0], f_db.cur.description))
+
+      f_db.commit(q_creater)
+      f_db.fetch_one(f'select * from {q_table}')
+
+      # f_db.cur.execute(q_creater)
+      # f_db.cur.execute(f'select * from {q_table}')
+
+    cur, conn = f_db.get_cur()
+    cur.execute(f'select * from {q_table}')
+    q_table_colls = list(map(lambda x: x[0], cur.description))
     if_update=  False
     if len(q_obj_colls)+1 != len(q_table_colls):
       print(f'find different coll size in {q_table}')
@@ -82,8 +90,10 @@ def update_db(f_db_entitys : list[Type[yEntity]],f_db = DbHelper()):
           if q_obj_colls[q_key] is int:
             # print('its int')
             q_type = 'integer'
-          f_db.cur.execute(f"alter table {q_table} add column '%s'  {q_type}"% q_key)
-          f_db.conn.commit()
+          cur.execute(f"alter table {q_table} add column '%s'  {q_type}"% q_key)
+          conn.commit()
+    cur.close()
+    conn.close()
   f_db.close()
 
   f_end = round(datetime.datetime.now().timestamp() - f_start,4)

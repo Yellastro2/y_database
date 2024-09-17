@@ -5,8 +5,8 @@ from sqlite3 import Connection
 def get_con(f_name = "some.db") -> Connection:
   try:
     conn = sqlite3.connect(f_name,
-                           check_same_thread=False,
-                           timeout=30)
+                           # check_same_thread=False,
+                           timeout=1)
 
   except:
     conn = None

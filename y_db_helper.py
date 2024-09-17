@@ -1,4 +1,4 @@
-from sqlite3 import Connection
+from sqlite3 import Connection, Cursor
 
 
 class yDbHelper():
@@ -8,7 +8,32 @@ class yDbHelper():
   def __init__(self):
     pass
 
+  def fetch_one(self, SQL, f_vals: tuple|list = ()):
+    cur, conn = self.execute_sql(SQL, f_vals)
+    f_res = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return f_res
 
+  def fetch_all(self, SQL, f_vals: tuple|list = ()):
+
+    cur, conn = self.execute_sql(SQL, f_vals)
+    f_res = cur.fetchall()
+    cur.close()
+    conn.close()
+    return f_res
+
+
+  def commit(self, SQL, f_vals: tuple|list = ()):
+    cur, conn = self.execute_sql(SQL, f_vals)
+    f_last_id = cur.lastrowid
+    conn.commit()
+    cur.close()
+    conn.close()
+    return f_last_id
+
+  def get_cur(self) -> (Cursor, Connection):
+    pass
 
   def close(self):
     try:
