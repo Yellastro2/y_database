@@ -71,7 +71,7 @@ def update_db(f_db_entitys : list[Type[yEntity]],f_db = DbHelper()):
       q_creater = get_sql_create_table(q_table, f_db_gen_tables[q_table])
 
       f_db.commit(q_creater)
-      f_db.fetch_one(f'select * from {q_table}')
+      # f_db.fetch_one(f'select * from {q_table}')
 
       # f_db.cur.execute(q_creater)
       # f_db.cur.execute(f'select * from {q_table}')
