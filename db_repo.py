@@ -32,7 +32,7 @@ def update_entity(f_entity: yEntity,f_db = DbHelper()) -> int:
 
   # Если айди -1 - сущность новая, функция добавить ее в базу и добавит новый айди в сущность
   if f_entity.id == -1:
-    print(f'make new entity of signal')
+    print(f'make new entity of {f_entity.__class__.__name__}')
     f_new_id = f_db.add_row(f_entity.__class__.__name__,
                  f_entity.get_data())
     f_entity.id = f_new_id
