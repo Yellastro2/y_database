@@ -1,4 +1,8 @@
+import traceback
 from sqlite3 import Connection, Cursor
+
+from y_database.connectors import sqlite_connection
+from y_database.db_confings import default_name
 
 
 class yDbHelper():
@@ -7,6 +11,17 @@ class yDbHelper():
 
   def __init__(self):
     pass
+
+  def execute_sql(self, SQL, valls: tuple = (), cur=""):
+    connection = sqlite_connection.get_con(default_name)
+    cur = connection.cursor()
+    f_result = ''
+    try:
+      f_result = cur.execute(SQL, valls)
+    except Exception as e:
+      print(traceback.format_exc())
+
+    return f_result , connection
 
   def fetch_one(self, SQL, f_vals: tuple|list = ()):
     cur, conn = self.execute_sql(SQL, f_vals)
@@ -23,6 +38,14 @@ class yDbHelper():
     conn.close()
     return f_res
 
+  def fetch_many(self, SQL, size, f_vals: tuple|list = ()):
+
+    cur, conn = self.execute_sql(SQL, f_vals)
+    f_res = cur.fetchmany(size)
+    cur.close()
+    conn.close()
+    return f_res
+
 
   def commit(self, SQL, f_vals: tuple|list = ()):
     cur, conn = self.execute_sql(SQL, f_vals)
@@ -31,6 +54,14 @@ class yDbHelper():
     cur.close()
     conn.close()
     return f_last_id
+
+  def get_sorted_rows_by_coll(self, table, coll, coll_val, f_sort_coll, f_size=10):
+    SQL = f"SELECT * FROM `{table}` WHERE `{coll}` = '{coll_val}' ORDER BY `{f_sort_coll}` DESC "
+    # result = self.cursor.execute(SQL)
+    # f_size = result.arraysize
+    return self.fetch_many(SQL,
+                           f_size)
+    # return result.fetch_many(f_size)
 
   def get_cur(self) -> (Cursor, Connection):
     pass
