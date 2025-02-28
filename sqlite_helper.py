@@ -174,12 +174,6 @@ class DbHelper(yDbHelper):
 
   def get_all_cells_by_coll(self, table, coll, coll_val, f_cell):
     SQL = f"SELECT * FROM `{table}` WHERE `{coll}` = '{coll_val}'"
-    # result = self.cur.execute(SQL)
-    # return result.fetchall()
-    # cur, conn = self.execute_sql(SQL)
-    # f_res = cur.fetchall()
-    # cur.close()
-    # conn.close()
     return self.fetch_all(SQL)
 
 
