@@ -1,6 +1,7 @@
 import json
 import logging
 import traceback
+from enum import Enum
 
 
 class yEntity:
@@ -38,6 +39,9 @@ class yEntity:
     for q_d in f_data.keys():
       if isinstance(f_data[q_d],float):
         f_data[q_d] = str(f_data[q_d])
+
+      if isinstance(f_data[q_d], Enum):
+        f_data[q_d] = f_data[q_d].value
 
       if isinstance(f_data[q_d],list) or isinstance(f_data[q_d],dict) or isinstance(f_data[q_d],tuple):
         f_data[q_d] = json.dumps(f_data[q_d])
