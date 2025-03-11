@@ -26,6 +26,9 @@ class yEntity:
           except:
             e = traceback.format_exc()
             logging.error('ERROR on parse json from string in yEntity')
+        if q_field in f_anotated.keys() and f_anotated[q_field] in [bool]:
+          params[i] = params[i] and int(params[i]) == 1
+
         self.__dict__[q_field] = params[i]
       else:
         logging.warning(f'{self.__class__.__name__} init without enougth params')
@@ -45,6 +48,9 @@ class yEntity:
 
       if isinstance(f_data[q_d],list) or isinstance(f_data[q_d],dict) or isinstance(f_data[q_d],tuple):
         f_data[q_d] = json.dumps(f_data[q_d])
+
+      if isinstance(f_data[q_d],bool):
+        f_data[q_d] = 1 if f_data[q_d] else 0
 
     return f_data
 
