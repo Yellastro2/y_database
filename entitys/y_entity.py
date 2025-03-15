@@ -7,29 +7,30 @@ from enum import Enum
 class yEntity:
   id: int = -1
 
-  def __init__(self,params):
-    params = list(params)
+  def __init__(self, **params):
+    # params = list(params)
     f_fields = self.list_attributes()
     f_anotated = self.__annotations__
     i = 0
     for q_field in f_fields:
-      if len(params) > i:
-        if q_field in f_anotated.keys() and f_anotated[q_field] == float and isinstance(params[i],str):
+      if q_field in params:
+      # if len(params) > i:
+        if q_field in f_anotated.keys() and f_anotated[q_field] == float and isinstance(params[q_field],str):
           try:
-            params[i] = float(params[i])
+            params[q_field] = float(params[q_field])
           except:
             e = traceback.format_exc()
             logging.error('ERROR on parse float from string in yEntity')
-        if q_field in f_anotated.keys() and f_anotated[q_field] in [list,dict,tuple] and isinstance(params[i],str):
+        if q_field in f_anotated.keys() and f_anotated[q_field] in [list,dict,tuple] and isinstance(params[q_field],str):
           try:
-            params[i] = json.loads(params[i])
+            params[q_field] = json.loads(params[q_field])
           except:
             e = traceback.format_exc()
             logging.error('ERROR on parse json from string in yEntity')
         if q_field in f_anotated.keys() and f_anotated[q_field] in [bool]:
-          params[i] = params[i] and int(params[i]) == 1
+          params[q_field] =  params[q_field] and int(params[q_field]) == 1
 
-        self.__dict__[q_field] = params[i]
+        self.__dict__[q_field] = params[q_field]
       else:
         logging.warning(f'{self.__class__.__name__} init without enougth params')
         break

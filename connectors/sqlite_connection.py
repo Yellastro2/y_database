@@ -8,6 +8,8 @@ def get_con(f_name = "some.db") -> Connection:
                            # check_same_thread=False,
                            timeout=1)
 
+    conn.row_factory = sqlite3.Row
+
   except:
     conn = None
     traceback.print_exc()

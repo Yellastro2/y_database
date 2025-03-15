@@ -27,7 +27,7 @@ def get_entity_by_coll(f_type: Type[T], f_coll, f_vall, f_db=DbHelper()) -> T:
   f_res = f_db.get_row_by_coll(f_type.__name__, f_coll, f_vall)
   if not f_res:
     return f_res
-  return f_type(f_res)
+  return f_type(**f_res)
 
 
 def get_entities_by_coll(f_type: Type[T], f_coll, f_vall, f_db=DbHelper()) -> list[T]:

@@ -51,10 +51,10 @@ class DbHelper(yDbHelper):
 
   def fetch_row(self, SQL, f_vals: tuple|list = ()):
     cur, conn = self.execute_sql(SQL, f_vals)
-    f_res = cur.fetchone()
+    row = cur.fetchone()
     cur.close()
     conn.close()
-    return f_res
+    return dict(row) if row else None
 
   def fetch_all(self, SQL, f_vals: tuple|list = ()):
 
@@ -117,11 +117,6 @@ class DbHelper(yDbHelper):
 
   def get_cell_by_coll(self, table, coll, coll_val, f_cell):
     SQL = f"SELECT `{f_cell}` FROM `{table}` WHERE `{coll}` = '{coll_val}'"
-    # # result = self.cur.execute(SQL)
-    # cur, conn = self.execute_sql(SQL)
-    # f_res = cur.fetchone()[0]
-    # cur.close()
-    # conn.close()
     return self.fetch_one(SQL)
 
   def row_exists(self,table,coll,coll_val):
@@ -188,14 +183,7 @@ class DbHelper(yDbHelper):
 
   def get_row_by_coll(self, table, coll, coll_vall):
     SQL = f"SELECT * FROM {table} WHERE {coll} = ?"
-    # cur, conn = self.execute_sql(SQL, (coll_vall,))
-    # f_res = cur.fetchone()
-    # cur.close()
-    # conn.close()
     return self.fetch_row(SQL, (coll_vall,))
-
-    # result = self.cur.execute()
-    # return result.fetchone()
 
 
 
