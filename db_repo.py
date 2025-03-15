@@ -11,7 +11,7 @@ def get_entity(f_type: Type[T],
                f_db=DbHelper()) -> T:
   f_res = f_db.get_row_by_coll(f_type.__name__, "id", f_id)
 
-  return f_type(f_res)
+  return f_type(**f_res)
 
 
 def get_all(f_type: Type[T],
@@ -19,7 +19,7 @@ def get_all(f_type: Type[T],
   f_res = f_db.get_table(f_type.__name__)
   f_all = []
   for q_it in f_res:
-    f_all.append(f_type(q_it))
+    f_all.append(f_type(**q_it))
   return f_all
 
 
@@ -36,7 +36,7 @@ def get_entities_by_coll(f_type: Type[T], f_coll, f_vall, f_db=DbHelper()) -> li
     return f_res
   f_res_list = []
   for q_res in f_res:
-    f_res_list.append(f_type(q_res))
+    f_res_list.append(f_type(**q_res))
   return f_res_list
 
 
