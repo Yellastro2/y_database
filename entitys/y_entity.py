@@ -1,8 +1,16 @@
+import enum
+import inspect
 import json
 import logging
 import traceback
 from enum import Enum
 
+
+primitive_types = (int, str, float, bool, list, dict, tuple)
+
+def is_custom_class(obj):
+    return (inspect.isclass(obj) and obj not in primitive_types and
+            not issubclass(obj, enum.Enum))
 
 class yEntity:
   id: int = -1
@@ -21,7 +29,9 @@ class yEntity:
           except:
             e = traceback.format_exc()
             logging.error('ERROR on parse float from string in yEntity')
-        if q_field in f_anotated.keys() and f_anotated[q_field] in [list,dict,tuple] and isinstance(params[q_field],str):
+        if (q_field in f_anotated.keys()
+            and (is_custom_class(f_anotated[q_field]) or f_anotated[q_field] in [list,dict,tuple])
+            and isinstance(params[q_field],str)):
           try:
             params[q_field] = json.loads(params[q_field])
           except:
