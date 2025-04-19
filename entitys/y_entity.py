@@ -33,7 +33,7 @@ class yEntity:
         self.__dict__[q_field] = params[q_field]
       else:
         logging.warning(f'{self.__class__.__name__} init without enougth params')
-        break
+        continue
       i += 1
 
   def get_data(self) -> dict:
