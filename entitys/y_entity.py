@@ -28,7 +28,7 @@ class yEntity:
             params[q_field] = float(params[q_field])
           except:
             e = traceback.format_exc()
-            logging.error('ERROR on parse float from string in yEntity')
+            # logging.error('ERROR on parse float from string in yEntity')
         if (q_field in f_anotated.keys()
             and (is_custom_class(f_anotated[q_field]) or f_anotated[q_field] in [list,dict,tuple])
             and isinstance(params[q_field],str)):
@@ -36,7 +36,7 @@ class yEntity:
             params[q_field] = json.loads(params[q_field])
           except:
             e = traceback.format_exc()
-            logging.error('ERROR on parse json from string in yEntity')
+            # logging.error('ERROR on parse json from string in yEntity')
         if q_field in f_anotated.keys() and f_anotated[q_field] in [bool]:
           params[q_field] =  params[q_field] and int(params[q_field]) == 1
 
