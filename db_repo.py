@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type
+from typing import TypeVar, Generic, Type, Union
 
 from y_database.db_helper import DbHelper
 from y_database.entitys import yEntity
@@ -50,6 +50,34 @@ def remove_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
                     f_entity.id)
 
   return f_entity.id
+
+def get_by_sql(f_type: Type[T],
+               SQL: str,
+               f_valls: Union[tuple, list] = (),
+               f_db: DbHelper() = DbHelper(),
+               single: bool = False) -> Union[T, list[T], None]:
+  """
+  Выполнить произвольный SQL (с подстановкой имени таблицы) и
+  получить экземпляры f_type.
+
+  :param f_type: класс-сущность (унаследован от yEntity)
+  :param SQL: строка SQL с `{table}`-плейсхолдером для имени таблицы
+  :param f_valls: параметры для SQL-запроса
+  :param f_db: экземпляр DbHelper
+  :param single: если True — вернуть один объект (или None), иначе список
+  :return: один объект, список объектов или None
+  """
+  table_name = f_type.__name__
+  formatted_sql = SQL.format(table=table_name)
+  # Для выборки нескольких строк используем fetch_all
+  rows = f_db.fetch_all(formatted_sql, tuple(f_valls))
+
+  # Преобразуем каждую строку (dict или tuple) в f_type
+  instances = [f_type(**row) for row in rows]
+
+  if single:
+    return instances[0] if instances else None
+  return instances
 
 
 def update_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
