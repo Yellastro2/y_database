@@ -34,6 +34,7 @@ def get_sql_create_table(f_name,f_entity):
 
 
 def update_db(f_db_entitys : list[Type[yEntity]],f_db = DbHelper()):
+
   print(f'Start init yDatabase')
   f_start = datetime.datetime.now().timestamp()
 

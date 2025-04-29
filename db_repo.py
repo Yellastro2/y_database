@@ -96,3 +96,12 @@ def update_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
     f_new_id = f_entity.id
 
   return f_new_id
+
+def get_all_table_names(f_db=DbHelper()) -> list[str]:
+  """
+  Возвращает список всех названий таблиц в текущей базе данных.
+  """
+  sql = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"
+  rows = f_db.fetch_all(sql)
+  return [row["name"] for row in rows]
+
