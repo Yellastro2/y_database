@@ -51,8 +51,11 @@ class DbHelper(yDbHelper):
 
   def fetch_row(self, SQL, f_vals: tuple|list = ()):
     cur, conn = self.execute_sql(SQL, f_vals)
-    row = cur.fetchone()
-    cur.close()
+    if isinstance(cur, str):
+      row = None
+    else:
+      row = cur.fetchone()
+      cur.close()
     conn.close()
     return dict(row) if row else None
 
