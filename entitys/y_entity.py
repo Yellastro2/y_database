@@ -42,8 +42,23 @@ class yEntity:
 
         self.__dict__[q_field] = params[q_field]
       else:
-        logging.warning(f'{self.__class__.__name__} init without enougth params')
-        continue
+        if q_field in f_anotated:
+          ann = f_anotated[q_field]
+          if ann == dict:
+            self.__dict__[q_field] = {}
+          elif ann == list:
+            self.__dict__[q_field] = []
+          elif ann == tuple:
+            self.__dict__[q_field] = ()
+          elif ann == bool:
+            self.__dict__[q_field] = False
+          elif ann == float:
+            self.__dict__[q_field] = 0.0
+          else:
+            # ничего не знаем — просто пропускаем
+            logging.warning(f'{self.__class__.__name__}: no value for {q_field}')
+        else:
+          logging.warning(f'{self.__class__.__name__} init without enougth params')
       i += 1
 
   def get_data(self) -> dict:
@@ -58,7 +73,7 @@ class yEntity:
         f_data[q_d] = f_data[q_d].value
 
       if isinstance(f_data[q_d],list) or isinstance(f_data[q_d],dict) or isinstance(f_data[q_d],tuple):
-        f_data[q_d] = json.dumps(f_data[q_d])
+        f_data[q_d] = json.dumps(f_data[q_d], ensure_ascii=False)
 
       if isinstance(f_data[q_d],bool):
         f_data[q_d] = 1 if f_data[q_d] else 0
