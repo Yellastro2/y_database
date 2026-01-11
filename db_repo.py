@@ -39,6 +39,15 @@ def get_entities_by_coll(f_type: Type[T], f_coll, f_vall, f_db=DbHelper()) -> li
     f_res_list.append(f_type(**q_res))
   return f_res_list
 
+def get_entities_by_colls(f_type: Type[T], f_colls: dict, f_db=DbHelper()) -> list[T]:
+  f_res = f_db.get_rows_by_colls(f_type.__name__, f_colls)
+  if not f_res:
+    return f_res
+  f_res_list = []
+  for q_res in f_res:
+    f_res_list.append(f_type(**q_res))
+  return f_res_list
+
 
 def remove_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
   if f_entity.id == -1:
