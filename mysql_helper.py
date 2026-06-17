@@ -5,7 +5,7 @@ import mysql
 from mysql.connector import MySQLConnection
 from mysql.connector.cursor import MySQLCursor
 
-import private_conf
+import env_configs
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
@@ -42,10 +42,10 @@ class DbHelper(yDbHelper):
     # self.conn = get_con(f_type)
     self.connection_pool = mysql.connector.pooling.MySQLConnectionPool(
       pool_name="inventory_pool",
-      host=private_conf.some_args.get('mysql_host'),
-      user=private_conf.some_args.get('mysql_user'),
-      password=private_conf.some_args.get('mysql_pass'),
-      database=private_conf.some_args.get('mysql_db')
+      host=env_configs.some_args.get('mysql_host'),
+      user=env_configs.some_args.get('mysql_user'),
+      password=env_configs.some_args.get('mysql_pass'),
+      database=env_configs.some_args.get('mysql_db')
     )
     # self.cur = self.conn.cursor()
 
