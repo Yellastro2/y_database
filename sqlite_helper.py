@@ -3,7 +3,7 @@ import traceback
 from sqlite3 import Connection, Cursor
 
 from y_database.connectors import sqlite_connection
-from y_database.db_confings import default_name
+from y_database.db_confings import get_default_name
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
@@ -21,12 +21,12 @@ def get_con(f_type = 'sqlite'):
   :return:
   '''
 
-  from y_database.connectors.sqlite_connection import get_con
-
-  all_conns[f_type] = sqlite_connection.get_con()
+  all_conns[f_type] = sqlite_connection.get_con(get_default_name())
   return all_conns[f_type]
 
-def get_db_connection(f_name = default_name):
+def get_db_connection(f_name=None):
+  if f_name is None:
+    f_name = get_default_name()
   all_conns[f_name] = sqlite_connection.get_con(f_name)
   return all_conns[f_name]
 
@@ -36,8 +36,8 @@ def get_db_connection(f_name = default_name):
 class DbHelper(yDbHelper):
   # conn: Connection
 
-  def __init__(self):
-    super().__init__()
+  def __init__(self, db_name=None):
+    super().__init__(db_name=db_name)
     # self.conn = get_db_connection()
     # self.cur = self.conn.cursor()
 
@@ -81,7 +81,7 @@ class DbHelper(yDbHelper):
   def execute_sql(self, SQL, valls: tuple = (), cur=""):
     # print(f'EXECUTE SQL: {SQL}')
 
-    connection = sqlite_connection.get_con(default_name)
+    connection = sqlite_connection.get_con(self.db_name)
     cur = connection.cursor()
     f_result = ''
     try:
@@ -97,7 +97,7 @@ class DbHelper(yDbHelper):
 
 
   def get_cur(self):
-    connection = sqlite_connection.get_con(default_name)
+    connection = sqlite_connection.get_con(self.db_name)
     cur = connection.cursor()
 
     return cur, connection

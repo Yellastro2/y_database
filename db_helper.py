@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from y_database.y_db_helper import yDbHelper
@@ -8,23 +9,33 @@ db_vers = 1
 
 all_conns = {}
 
-def DbHelper(f_type = 'sqlite') -> yDbHelper:
+def DbHelper(f_type='sqlite', db_name=None) -> yDbHelper:
   '''
 
   :param f_type: 'sqlite' | 'mysql'
+  :param db_name: explicit SQLite database name; otherwise use configured default
   :return:
   '''
 
-  if f_type not in all_conns.keys():
+  if db_name is not None:
+    db_name = os.fspath(db_name)
+
+  f_key = f_type if db_name is None else (f_type, db_name)
+
+  if f_key not in all_conns:
     if f_type == 'sqlite':
       from y_database.sqlite_helper import DbHelper
 
-      all_conns[f_type] = DbHelper()
+      all_conns[f_key] = DbHelper(db_name=db_name)
     elif f_type == 'mysql':
+      if db_name is not None:
+        raise ValueError("db_name is supported only for sqlite helpers")
       from y_database.mysql_helper import DbHelper
 
-      all_conns[f_type] = DbHelper()
-  return all_conns[f_type]
+      all_conns[f_key] = DbHelper()
+    else:
+      raise ValueError(f"Unsupported database type: {f_type!r}")
+  return all_conns[f_key]
 
 def close_all():
   if 'mysql' in all_conns:

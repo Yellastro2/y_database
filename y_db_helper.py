@@ -2,18 +2,24 @@ import traceback
 from sqlite3 import Connection, Cursor
 
 from y_database.connectors import sqlite_connection
-from y_database.db_confings import default_name
+from y_database.db_confings import get_default_name
 
 
 class yDbHelper():
   conn: Connection
 
 
-  def __init__(self):
-    pass
+  def __init__(self, db_name=None):
+    self._explicit_db_name = db_name
+
+  @property
+  def db_name(self):
+    if self._explicit_db_name is not None:
+      return self._explicit_db_name
+    return get_default_name()
 
   def execute_sql(self, SQL, valls: tuple = (), cur=""):
-    connection = sqlite_connection.get_con(default_name)
+    connection = sqlite_connection.get_con(self.db_name)
     cur = connection.cursor()
     f_result = ''
     try:

@@ -6,16 +6,22 @@ from y_database.entitys import yEntity
 T = TypeVar("T", bound="yEntity")
 
 
+def _resolve_db(f_db):
+  return f_db if f_db is not None else DbHelper()
+
+
 def get_entity(f_type: Type[T],
                f_id,
-               f_db=DbHelper()) -> T:
+               f_db=None) -> T:
+  f_db = _resolve_db(f_db)
   f_res = f_db.get_row_by_coll(f_type.__name__, "id", f_id)
 
   return f_type(**f_res)
 
 
 def get_all(f_type: Type[T],
-            f_db=DbHelper()) -> list[T]:
+            f_db=None) -> list[T]:
+  f_db = _resolve_db(f_db)
   f_res = f_db.get_table(f_type.__name__)
   f_all = []
   for q_it in f_res:
@@ -23,14 +29,16 @@ def get_all(f_type: Type[T],
   return f_all
 
 
-def get_entity_by_coll(f_type: Type[T], f_coll, f_vall, f_db=DbHelper()) -> T:
+def get_entity_by_coll(f_type: Type[T], f_coll, f_vall, f_db=None) -> T:
+  f_db = _resolve_db(f_db)
   f_res = f_db.get_row_by_coll(f_type.__name__, f_coll, f_vall)
   if not f_res:
     return f_res
   return f_type(**f_res)
 
 
-def get_entities_by_coll(f_type: Type[T], f_coll, f_vall, f_db=DbHelper()) -> list[T]:
+def get_entities_by_coll(f_type: Type[T], f_coll, f_vall, f_db=None) -> list[T]:
+  f_db = _resolve_db(f_db)
   f_res = f_db.get_rows_by_coll(f_type.__name__, f_coll, f_vall)
   if not f_res:
     return f_res
@@ -39,7 +47,8 @@ def get_entities_by_coll(f_type: Type[T], f_coll, f_vall, f_db=DbHelper()) -> li
     f_res_list.append(f_type(**q_res))
   return f_res_list
 
-def get_entities_by_colls(f_type: Type[T], f_colls: dict, f_db=DbHelper()) -> list[T]:
+def get_entities_by_colls(f_type: Type[T], f_colls: dict, f_db=None) -> list[T]:
+  f_db = _resolve_db(f_db)
   f_res = f_db.get_rows_by_colls(f_type.__name__, f_colls)
   if not f_res:
     return f_res
@@ -49,7 +58,8 @@ def get_entities_by_colls(f_type: Type[T], f_colls: dict, f_db=DbHelper()) -> li
   return f_res_list
 
 
-def remove_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
+def remove_entity(f_entity: yEntity, f_db=None) -> int:
+  f_db = _resolve_db(f_db)
   if f_entity.id == -1:
     print(f'make new entity of signal')
     return -1
@@ -63,7 +73,7 @@ def remove_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
 def get_by_sql(f_type: Type[T],
                SQL: str,
                f_valls: Union[tuple, list] = (),
-               f_db: DbHelper() = DbHelper(),
+               f_db=None,
                single: bool = False) -> Union[T, list[T], None]:
   """
   Выполнить произвольный SQL (с подстановкой имени таблицы) и
@@ -76,6 +86,7 @@ def get_by_sql(f_type: Type[T],
   :param single: если True — вернуть один объект (или None), иначе список
   :return: один объект, список объектов или None
   """
+  f_db = _resolve_db(f_db)
   table_name = f_type.__name__
   formatted_sql = SQL.format(table=table_name)
   # Для выборки нескольких строк используем fetch_all
@@ -89,7 +100,8 @@ def get_by_sql(f_type: Type[T],
   return instances
 
 
-def update_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
+def update_entity(f_entity: yEntity, f_db=None) -> int:
+  f_db = _resolve_db(f_db)
   # Если айди -1 - сущность новая, функция добавить ее в базу и добавит новый айди в сущность
   if f_entity.id == -1:
     print(f'make new entity of {f_entity.__class__.__name__}')
@@ -106,10 +118,11 @@ def update_entity(f_entity: yEntity, f_db=DbHelper()) -> int:
 
   return f_new_id
 
-def get_all_table_names(f_db=DbHelper()) -> list[str]:
+def get_all_table_names(f_db=None) -> list[str]:
   """
   Возвращает список всех названий таблиц в текущей базе данных.
   """
+  f_db = _resolve_db(f_db)
   sql = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"
   rows = f_db.fetch_all(sql)
   return [row["name"] for row in rows]
