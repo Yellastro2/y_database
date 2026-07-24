@@ -1,9 +1,11 @@
+import logging
 from typing import TypeVar, Generic, Type, Union
 
 from y_database.db_helper import DbHelper
 from y_database.entitys import yEntity
 
 T = TypeVar("T", bound="yEntity")
+logger = logging.getLogger(__name__)
 
 
 def _resolve_db(f_db):
@@ -61,10 +63,10 @@ def get_entities_by_colls(f_type: Type[T], f_colls: dict, f_db=None) -> list[T]:
 def remove_entity(f_entity: yEntity, f_db=None) -> int:
   f_db = _resolve_db(f_db)
   if f_entity.id == -1:
-    print(f'make new entity of signal')
+    logger.debug('skip removing new entity of signal')
     return -1
   else:
-    print(f'upd exist entity')
+    logger.debug('remove existing entity')
     f_db.delete_row(f_entity.__class__.__name__,
                     f_entity.id)
 
@@ -104,12 +106,12 @@ def update_entity(f_entity: yEntity, f_db=None) -> int:
   f_db = _resolve_db(f_db)
   # Если айди -1 - сущность новая, функция добавить ее в базу и добавит новый айди в сущность
   if f_entity.id == -1:
-    print(f'make new entity of {f_entity.__class__.__name__}')
+    logger.debug('make new entity of %s', f_entity.__class__.__name__)
     f_new_id = f_db.add_row(f_entity.__class__.__name__,
                             f_entity.get_data())
     f_entity.id = f_new_id
   else:
-    print(f'upd exist entity')
+    logger.debug('update existing entity')
     f_db.upd_row_by_coll(f_entity.__class__.__name__,
                          'id',
                          f_entity.id,

@@ -1,7 +1,11 @@
+import logging
+
 import mariadb
 from mariadb import Connection
 
 import env_configs
+
+logger = logging.getLogger(__name__)
 
 
 def get_con() -> Connection:
@@ -13,5 +17,5 @@ def get_con() -> Connection:
       database=env_configs.some_args.get('mysql_db')
 
     )
-  except mariadb.Error as e:
-    print(f"Error connecting to MariaDB Platform: {e}")
+  except mariadb.Error:
+    logger.exception('Error connecting to MariaDB Platform')

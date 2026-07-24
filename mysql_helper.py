@@ -1,3 +1,4 @@
+import logging
 import time
 import traceback
 
@@ -9,6 +10,7 @@ import env_configs
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
+logger = logging.getLogger(__name__)
 
 # conn: Connection
 
@@ -60,7 +62,7 @@ class DbHelper(yDbHelper):
       pass
 
   def execute_sql(self,SQL,valls: tuple, cur = ""):
-    print(f'EXECUTE SQL: {SQL}')
+    logger.debug('EXECUTE SQL: %s', SQL)
     is_exclusive_cursor = False
     if not cur:
       is_exclusive_cursor = True
@@ -81,7 +83,7 @@ class DbHelper(yDbHelper):
     try:
       cur.execute(SQL, valls)
     except Exception as e:
-      print(traceback.format_exc())
+      logger.exception('Error executing MySQL query')
 
     return cur, connection
 
@@ -97,7 +99,7 @@ class DbHelper(yDbHelper):
       else:
         f_result = cur.fetchall()
     except Exception as e:
-      print(traceback.format_exc())
+      logger.exception('Error fetching MySQL result')
 
 
     cur.close()

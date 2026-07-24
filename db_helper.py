@@ -1,9 +1,11 @@
+import logging
 import os
 import traceback
 
 from y_database.y_db_helper import yDbHelper
 
 db_vers = 1
+logger = logging.getLogger(__name__)
 
 # conn: Connection
 
@@ -42,7 +44,7 @@ def close_all():
     try:
       all_conns['mysql'].conn.close()
     except:
-      print(traceback.format_exc())
+      logger.exception('Error while closing mysql connection')
 
 # conn = get_con()
 

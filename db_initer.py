@@ -1,10 +1,13 @@
 import datetime
+import logging
 import traceback
 from typing import Type
 
 from y_database.db_helper import DbHelper
 from y_database.db_keys import k_bot_conf_table, k_value, k_type
 from y_database.entitys import yEntity
+
+logger = logging.getLogger(__name__)
 
 
 def get_sql_create_table(f_name,f_entity):
@@ -37,7 +40,7 @@ def update_db(f_db_entitys: list[Type[yEntity]], f_db=None):
   if f_db is None:
     f_db = DbHelper()
 
-  print(f'Start init yDatabase')
+  logger.info('Start init yDatabase')
   f_start = datetime.datetime.now().timestamp()
 
   f_db_gen_tables = {
@@ -63,7 +66,7 @@ def update_db(f_db_entitys: list[Type[yEntity]], f_db=None):
   #
   #   print('success update db')
 
-  print('check autogener tables, for now only coll count')
+  logger.info('check autogener tables, for now only coll count')
 
   for q_table in f_db_gen_tables.keys():
     q_obj_colls = f_db_gen_tables[q_table].__dict__['__annotations__']
@@ -84,10 +87,10 @@ def update_db(f_db_entitys: list[Type[yEntity]], f_db=None):
     q_table_colls = list(map(lambda x: x[0], cur.description))
     if_update=  False
     if len(q_obj_colls)+1 != len(q_table_colls):
-      print(f'find different coll size in {q_table}')
+      logger.info('find different coll size in %s', q_table)
       for q_key in q_obj_colls.keys():
         if q_key not in q_table_colls:
-          print(f'find apsent coll {q_key} in {q_table}, type {q_obj_colls[q_key]}')
+          logger.info('find apsent coll %s in %s, type %s', q_key, q_table, q_obj_colls[q_key])
           q_type = 'text'
           # print(q_field)
           if q_obj_colls[q_key] is int:
@@ -101,7 +104,7 @@ def update_db(f_db_entitys: list[Type[yEntity]], f_db=None):
 
   f_end = round(datetime.datetime.now().timestamp() - f_start,4)
 
-  print(f'yDatabase inited: {f_end} sec')
+  logger.info('yDatabase inited: %s sec', f_end)
 
 
 

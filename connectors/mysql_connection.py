@@ -1,6 +1,10 @@
+import logging
+
 from mysql.connector import connect, Error
 
 import env_configs
+
+logger = logging.getLogger(__name__)
 
 
 def get_con():
@@ -15,7 +19,7 @@ def get_con():
         # with conn.cursor(buffered=True) as cur:
         #
         #     cur.execute('set global max_allowed_packet=67108864')
-    except Error as e:
-        print(e)
+    except Error:
+        logger.exception('Error connecting to MySQL')
 
     return conn

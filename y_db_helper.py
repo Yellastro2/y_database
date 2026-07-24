@@ -1,8 +1,11 @@
+import logging
 import traceback
 from sqlite3 import Connection, Cursor
 
 from y_database.connectors import sqlite_connection
 from y_database.db_confings import get_default_name
+
+logger = logging.getLogger(__name__)
 
 
 class yDbHelper():
@@ -25,7 +28,7 @@ class yDbHelper():
     try:
       f_result = cur.execute(SQL, valls)
     except Exception as e:
-      print(traceback.format_exc())
+      logger.exception('Error executing SQL query')
 
     return f_result , connection
 
